@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>工厂模式</title>
+    <script>
+    (function() {
+        // 工厂模式
+        const FormFieldFactory = {
+            makeField(options = {}) {
+                const type = options.type || 'text';
+                const displayText = options.displayText || '';
+
+                let field;
+
+                switch(type) {
+                    case 'text':
+                        field = new TextField(displayText);
+                        break;
+
+                    case 'email':
+                        field = new EmailField(displayText);
+                        break;
+
+                    case 'button':
+                        field = new ButtonField(displayText);
+                        break;
+
+                    default: 
+                        field = new TextField(displayText);
+                        break;
+                }
+
+                return field;
+            }
+        };
+
+        class TextField {
+            constructor(displayText) {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const textField = document.createElement('input');
+
+                textField.setAttribute('type', 'text');
+                textField.setAttribute('placeholder', this.displayText);
+
+                return textField;
+            }
+        }
+
+        class EmailField {
+            constructor(displayText) {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const emailField = document.createElement('input');
+
+                emailField.setAttribute('type', 'email');
+                emailField.setAttribute('placeholder', this.displayText);
+
+                return emailField;
+            }
+        }
+
+        class ButtonField {
+            constructor(displayText) {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const button = document.createElement('input');
+
+                button.setAttribute('type', 'submit');
+                button.setAttribute('placeholder', this.displayText);
+
+                return button;
+            }
+        }
+
+        window.FormFieldFactory = FormFieldFactory;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用工厂模式
+        const textField = FormFieldFactory.makeField({
+            type: 'text',
+            displayText: 'Enter the first line of your address'
+        });
+
+        const emailField = FormFieldFactory.makeField({
+            type: 'email',
+            displayText: 'Enter your email address'
+        });
+
+        const buttonField = FormFieldFactory.makeField({
+            type: 'button',
+            displayText: 'Submit'
+        });
+
+        window.addEventListener('load', function() {
+            const bodyElement = document.body;
+
+            bodyElement.appendChild(textField.getElement());
+            bodyElement.appendChild(emailField.getElement());
+            bodyElement.appendChild(buttonField.getElement());
+        });
+    </script>
+</body>
+</html>
