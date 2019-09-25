@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>装饰模式</title>
+    <script>
+    (function() {
+        // 装饰模式
+        // 定义一个类，用于构建一个对象来表示一个简单的表单域
+        class FormField {
+            constructor(type = 'text', displayText = '') {
+                this.type = type;
+                this.displayText = displayText;
+            }
+
+            createElement() {
+                this.element = document.createElement('input');
+                this.element.setAttribute('type', this.type);
+                this.element.setAttribute('placeholder', this.displayText);
+                return this.element;
+            }
+
+            isValid() {
+                return this.element.value !== '';
+            }
+        }
+
+        // 表单域装饰者，它实现了与FormField相同的公共方法
+        class FormFieldDecorator {
+            constructor(formField) {
+                this.formField = formField;
+            }
+
+            createElement() {
+                this.formField.createElement();
+            }
+
+            isValid() {
+                return this.formField.isValid();
+            }
+        }
+
+        class MaxLengthFieldDecorator extends FormFieldDecorator {
+            constructor(formField, maxLength = 100) {
+                super(formField);
+
+                this.maxLength = maxLength;
+            }
+
+            createElement() {
+                const element = this.formField.createElement();
+                element.setAttribute('maxlength', this.maxLength);
+                return element;
+            }
+        }
+
+        class AutoCompleteFieldDecorator extends FormFieldDecorator {
+            constructor(formField, autocomplete = 'on') {
+                super(formField);
+
+                this.autocomplete = autocomplete;
+            }
+
+            createElement() {
+                const element = this.formField.createElement();
+                element.setAttribute('autocomplete', this.autocomplete);
+                return element;
+            }
+        }
+    
+        window.FormField = FormField;
+        window.MaxLengthFieldDecorator = MaxLengthFieldDecorator;
+        window.AutoCompleteFieldDecorator = AutoCompleteFieldDecorator;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用装饰模式
+        const form = document.createElement('form');
+        let formField = new FormField('search', 'Enter your search term');
+
+        // 使用装饰器为所生成的表单域元素添加maxlength和autocomplete
+        formField = new MaxLengthFieldDecorator(formField, 255);
+        formField = new AutoCompleteFieldDecorator(formField, 'off');
+
+        form.appendChild(formField.createElement());
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // 屏蔽表单的默认提交动作
+
+            if( formField.isValid() ) {
+                form.submit();
+            } else {
+                alert('Please correct the issues in the form field.');
+            }
+        }, false);
+
+        window.addEventListener('load', function() {
+            document.body.appendChild(form);
+        }, false);
+    </script>
+</body>
+</html>
