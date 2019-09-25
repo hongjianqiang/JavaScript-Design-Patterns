@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>原型模式</title>
+    <script>
+    (function() {
+        // 原型模式
+        // 使用prototype关键字实现原型模式
+        let textField, emailField;
+
+        function Field(type = '', displayText = '') {
+            this.type = type;
+            this.displayText = displayText;
+        }
+
+        // 使用prototype属性来实现原型模式。所定义的方法将会应用于所有继承于此类的对象
+        Field.prototype = {
+            getElement() {
+                const field = document.createElement('input');
+
+                field.setAttribute('type', this.type);
+                field.setAttribute('placeholder', this.displayText);
+
+                return field;
+            }
+        };
+
+        textField = new Field('text', 'Enter the first line of your address');
+        emailField = new Field('text', 'Enter your email address');
+
+        // 使用原型模式
+        window.addEventListener('load', function() {
+            const body = document.body;
+
+            body.appendChild(textField.getElement());
+            body.appendChild(emailField.getElement());
+        }, false);
+    })();
+
+    (function() {
+        // 使用ECMAScript 5实现原型模式
+        const field = {
+            type: '',
+            displayText: '',
+
+            getElement() {
+                const field = document.createElement('input');
+
+                field.setAttribute('type', this.type);
+                field.setAttribute('placeholder', this.displayText);
+
+                return field;
+            }
+        };
+
+        const textField = Object.create(field, {
+            type: {
+                value: 'text',
+                enumerable: true
+            },
+            displayText: {
+                value: 'Enter the first line of your address',
+                enumerable: true
+            }
+        });
+
+        const emailField = Object.create(field, {
+            type: {
+                value: 'email',
+                enumerable: true
+            },
+            displayText: {
+                value: 'Enter your email address',
+                enumerable: true
+            }
+        });
+
+        // 使用原型模式
+        window.addEventListener('load', function() {
+            const body = document.body;
+
+            body.appendChild(textField.getElement());
+            body.appendChild(emailField.getElement());
+        }, false);
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        
+    </script>
+</body>
+</html>
