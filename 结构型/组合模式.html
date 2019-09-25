@@ -33,12 +33,12 @@
 <body>
     <a href="适配器模式.html" class="link">适配器模式</a>
     <a href="组合模式.html" class="link red">组合模式</a>
-    <a href="装饰模式.html">组合模式</a>
+    <a href="装饰模式.html">装饰模式</a>
 
     <script>
         // 使用组合模式
-        const body = elements.get('body');
-        const links = elements.get('a');
+        const body = elements.get('body');  // 单独的元素
+        const links = elements.get('a');  // 一个数组
 
         elements.addClass(body, 'has-js');
         elements.addClass(links, 'custom-link')
