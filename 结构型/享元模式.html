@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>享元模式</title>
+    <script>
+    (function() {
+        // 享元模式
+        // 当面对大量的对象时，若这些对象里有着一些相似的共有属性“key-value”对，
+        // 这些“key-value”对可以分离成更小的对象，通过对这些对象的引用实现数据共享
+        // 使代码的内存占用更小，运行更高效
+
+        // 第一阶段，提取更小的对象出来
+        function Person(data = {}) {
+            this.ssId = data.ssId || '';
+            this.name = data.name || '';
+        }
+        function Company(data = {}) {
+            this.name = data.name || '';
+            this.address = data.address || '';
+            this.country = data.country || '';
+        }
+
+        // 第二阶段，确保更小的对象只创建一次并被保存起来供后续使用。
+        // 这是通过使用工厂模式来抽象对象实例的创建过程
+        const personFactory = (function() {
+            const people = {};
+            let personCount = 0;
+
+            return {
+                createPerson(data = {}) {
+                    const person = people[data.ssId];
+                    let newPerson;
+
+                    if(person) {
+                        return person;
+                    } else {
+                        newPerson = new Person(data);
+                        people[newPerson.ssId] = newPerson;
+                        personCount++;
+
+                        return newPerson;
+                    }
+                },
+
+                get getPersonCount() {
+                    return personCount;
+                }
+            }
+        })();
+        const companyFactory = (function() {
+            const companies = {};
+            let companyCount = 0;
+
+            return {
+                createCompany(data = {}) {
+                    const company = companies[data.name];
+                    let newCompany;
+
+                    if(company) {
+                        return company;
+                    } else {
+                        newCompany = new Company(data);
+                        companies[newCompany.name] = newCompany;
+                        companyCount++;
+
+                        return newCompany;
+                    }
+                },
+
+                get getCompanyCount() {
+                    return companyCount;
+                }
+            };
+        })();
+    
+        // 第三阶段，组织(引用)对象成期望的结构
+        const employee = (function() {
+            const employee = {};
+            let employeeCount = 0;
+
+            return {
+                add(data = {}) {
+                    const person = personFactory.createPerson({
+                        ssId: data.ssId,
+                        name: data.name
+                    });
+                    const company = companyFactory.createCompany({
+                        name: data.companyName,
+                        address: data.companyAddress,
+                        country: data.companyCountry
+                    });
+
+                    employee[data.employeeId] = {
+                        employeeId: data.employeeId,
+                        occupation: data.occupation,
+                        person: person,
+                        company: company
+                    };
+
+                    employeeCount++;
+                },
+
+                getName(employeeId) {
+                    return employee[employeeId].person.name;
+                },
+
+                getOccupation(employeeId) {
+                    return employee[employeeId].occupation;
+                },
+
+                getCompany(employeeId) {
+                    const company = employee[employeeId].company;
+                    return Object.values(company).join(', ');
+                },
+
+                get getTotalCount() {
+                    return employeeCount;
+                }
+            };
+        })();
+
+        window.personFactory = personFactory;
+        window.companyFactory = companyFactory;
+        window.employee = employee;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用享元模式
+        let denOdell = employee.add({
+            employeeId: 1456,
+            ssId: '1234-567-8901',
+            name: 'Den Odell',
+            occupation: 'Head of Web Development',
+            companyName: 'AKQA',
+            companyAddress: "1 St. John's Lane, London",
+            companyCountry: 'GB'
+        });
+        let steveBallmer = employee.add({
+            employeeId: 3,
+            ssId: '8376-940-1673',
+            name: 'Steve Ballmer',
+            occupation: 'Ex-CEO',
+            companyName: 'Microsoft',
+            companyAddress: "1 Microsoft Way, Redmond, WA",
+            companyCountry: 'US'
+        });
+        let billGates = employee.add({
+            employeeId: 1,
+            ssId: '7754-342-7584',
+            name: 'Bill Gates',
+            occupation: 'Founder',
+            companyName: 'Microsoft',
+            companyAddress: "1 Microsoft Way, Redmond, WA",
+            companyCountry: 'US'
+        });
+        let billGatesPhilanthropist = employee.add({
+            employeeId: 2,
+            ssId: '7754-342-7584',
+            name: 'Bill Gates',
+            occupation: 'Philanthropist',
+            companyName: 'Gates Foundation',
+            companyAddress: "500 Fifth Avenue North, Seattle, WA",
+            companyCountry: 'US'
+        });
+
+        alert( personFactory.getPersonCount );
+        alert( companyFactory.getCompanyCount );
+        alert( employee.getTotalCount );
+    </script>
+</body>
+</html>
