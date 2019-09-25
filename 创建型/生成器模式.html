@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>生成器模式</title>
+    <script>
+    (function() {
+        // 生成器模式
+        class FormBuilder {
+            constructor() {
+                this.fields = [];
+            }
+
+            addField(type, displayText) {
+                let field;
+
+                switch(type) {
+                    case 'text':
+                        field = new TextField(displayText);
+                        break;
+                    case 'email': 
+                        field = new EmailField(displayText);
+                        break;
+                    case 'button': 
+                        field = new ButtonField(displayText); 
+                        break;
+                    default:
+                        throw new Error(`Invalid field type specified: ${type}`);
+                }
+
+                this.fields.push(field);
+            }
+
+            getForm() {
+                const form = document.createElement('form');
+                
+                this.fields.forEach((field) => {
+                    form.appendChild(field.getElement());
+                });
+
+                return form;
+            }
+        }
+
+        class TextField {
+            constructor(displayText) {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const textField = document.createElement('input');
+
+                textField.setAttribute('type', 'text');
+                textField.setAttribute('placeholder', this.displayText);
+
+                return textField;
+            }
+        }
+
+        class EmailField {
+            constructor(displayText) {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const emailField = document.createElement('input');
+
+                emailField.setAttribute('type', 'email');
+                emailField.setAttribute('placeholder', this.displayText);
+
+                return emailField;
+            }
+        }
+
+        class ButtonField {
+            constructor(displayText) {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const button = document.createElement('input');
+
+                button.setAttribute('type', 'submit');
+                button.setAttribute('placeholder', this.displayText);
+
+                return button;
+            }
+        }
+
+        window.FormBuilder = FormBuilder;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用生成器模式
+        const formBuilder = new FormBuilder();
+
+        formBuilder.addField('text', 'Enter the first line of your address');
+        formBuilder.addField('email', 'Enter your email address');
+        formBuilder.addField('button', 'Submit');
+
+        const form = formBuilder.getForm();
+
+        window.addEventListener('load', function() {
+            document.body.appendChild(form);
+        }, false);
+    </script>
+</body>
+</html>
