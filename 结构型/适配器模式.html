@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>适配器模式</title>
+    <script>
+    (function() {
+        // 适配器模式
+        // 假设以下接口深藏在你庞大的代码库中，用于通过HTTP发出AJAX请求
+        const http = {
+            makeRequest(type, url, callback, data) {
+                console.log('这里是旧的方法');
+                const xhr = new XMLHttpRequest();
+                // ...
+                callback && callback(data);
+            }
+        };
+
+        // 现在对项目重构，你决定引入一个新对结构，使用命名空间，并把makeRequest()方法划分为GET和POST方法
+        const myProject = {
+            data: {
+                ajax: (function() {
+                    // 这里是一些初始化代码
+                    const xhr = new XMLHttpRequest();
+
+                    return {
+                        get(url, callback) {
+                            console.log('这里是新的GET方法');
+                            callback && callback();
+                        },
+                        post(url, data, callback) {
+                            console.log('这里是新的POST方法');
+                            callback && callback(data);
+                        }
+                    };
+                })()
+            }
+        };
+
+        window.http = http;
+        window.myProject = myProject;
+
+        // 创建一个适配器来映射旧接口至新方法
+        function httpToAjaxAdapter(type, url, callback, data) {
+            if('get'===type.toLowerCase()) {
+                myProject.data.ajax.get(url, callback);
+            } else if('post'===type.toLowerCase()) {
+                myProject.data.ajax.post(url, data, callback);
+            }
+        }
+
+        // 最后应用适配器来替代原来的方法
+        http.makeRequest = httpToAjaxAdapter;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用适配器模式
+        // 以上定义的http.makeRequest()方法可按如下方式调用
+        http.makeRequest('get', '/user/12345', function(resp) {
+            alert(`HTTP GET response received, User data: ${resp}`);
+        });
+        http.makeRequest('post', '/user/12345', function(resp) {
+            alert(`HTTP POST response received. New User data: ${resp}`);
+        }, 'company=AKQA&name=Den%200dell');
+
+        // 新对get()和post()方法可以按如下方式调用
+        myProject.data.ajax.get('/user/12345', function(resp) {
+            alert(`HTTP GET response received, User data: ${resp}`);
+        });
+        myProject.data.ajax.post('/user/12345', 'company=AKQA&name=Den%200dell', function(resp) {
+            alert(`HTTP POST response received. New User data: ${resp}`);
+        });
+    </script>
+</body>
+</html>
