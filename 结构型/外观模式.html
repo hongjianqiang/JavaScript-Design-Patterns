@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>外观模式</title>
+    <script>
+    (function() {
+        // 外观模式
+        // 定义一个函数，作为外观者(facade)来简化和实现跨浏览器的Ajax调用，所支持的浏览器可回溯至 IE5
+        function ajaxCall(type, url, callback, data) {
+            const xhr = (function() {
+                // 根据当前浏览器获取对Ajax连接对象的引用
+                try { return new XMLHttpRequest(); } catch(e) {}
+
+                // 较老版本的IE使用用户机器上安装的一个ActiveX对象
+                try { return new ActiveXObject('Msxml2.XMLHTTP.6.0'); } catch(e) {}
+
+                try { return new ActiveXObject('Msxml2.XMLHTTP.3.0'); } catch(e) {}
+
+                try { return new ActiveXObject('Microsoft.XMLHTTP'); } catch(e) {}
+
+                // 如果没有找到相关的Ajax连接对象，则抛出一个错误
+                throw new Error('Ajax not supported in this browser.');
+            })();
+
+            STATE_LOADED = 4;
+            STATE_OK = 200;
+
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState !== STATE_LOADED) return;
+
+                if(xhr.state === STATE_OK) callback(xhr.responseText);
+            }
+
+            xhr.open(type.toUpperCase(), url);
+            xhr.send(data);
+        }
+
+        window.ajaxCall = ajaxCall;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用外观模式
+        // ajaxCall()外观函数可实现跨浏览器的Ajax调用，使用方法如下：
+        ajaxCall('get', '/user/12345', function(resp) {
+            alert(`HTTP GET response received. User data: ${resp}`);
+        });
+        ajaxCall('post', '/user/12345', function(resp) {
+            alert(`HTTP POST response received. New user data: ${resp}`);
+        }, 'company=AKQA&name=Den%200dell');
+    </script>
+</body>
+</html>
