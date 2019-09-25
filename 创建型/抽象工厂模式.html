@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>抽象工厂模式</title>
+    <script>
+    (function() {
+        // 抽象工厂模式
+
+        // 定义一个基础“类”，于创建表单域，其他更明确的表单域创建工厂“类”将继承于此类
+        class FormFieldFactory {
+            constructor() {
+                this.availableTypes = {
+                    TEXT: 'text',
+                    EMAIL: 'email',
+                    BUTTON: 'button'
+                };
+            }
+
+            makeField() {
+                throw new Error('Thie method should nont be called directly.');
+            }
+        }
+
+        // 定义一个工厂“类”，继承于基础工厂“类”，用于HTML5表单域的创建
+        class html5FormFieldFactory extends FormFieldFactory {
+            constructor() {
+                super();
+            }
+
+            // 针对此工厂，使用明确的代码来重写makeField()方法
+            makeField(options = {}) {
+                const type = options.type || this.availableTypes.TEXT;
+                const displayText = options.displayText || '';
+
+                let field;
+
+                switch(type) {
+                    case this.availableTypes.TEXT: 
+                        field = new Html5TextField(displayText);
+                        break;
+
+                    case this.availableTypes.EMAIL:
+                        field = new Html5EmailField(displayText);
+                        break;
+
+                    case this.availableTypes.BUTTON: 
+                        field = new ButtonField(displayText);
+                        break;
+
+                    default:
+                        throw new Error(`Invalid field type specified: ${type}`);
+                }
+
+                return field;
+            }
+        }
+ 
+        // 定义一个工厂“类”，它也继承于相同的基础工厂“类”，用于老式HTML4表单域的创建
+        class html4FormFieldFactory extends FormFieldFactory {
+            constructor() {
+                super();
+            }
+
+            // 针对此工厂，使用明确的代码来重写makeField()方法
+            makeField(options = {}) {
+                const type = options.type || this.availableTypes.TEXT;
+                const displayText = options.displayText || '';
+
+                let field;
+
+                switch(type) {
+                    case this.availableTypes.TEXT:
+                    case this.availableTypes.EMAIL: 
+                        field = new HTML4TextField(displayText);
+                        break;
+                    case this.availableTypes.BUTTON: 
+                        field = new ButtonField(displayText);
+                        break;
+                    default:
+                        throw new Error(`Invalid field type specified: ${type}`);
+                }
+
+                return field;
+            }
+        }
+    
+        // 定义各项表单域“类”，用于创建各种HTML5和HTML4表单元素
+        class Html5TextField {
+            constructor(displayText = '') {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const textField = document.createElement('input');
+
+                textField.setAttribute('type', 'text');
+                textField.setAttribute('placeholder', this.displayText);
+
+                return textField;
+            }
+        }
+
+        // HTML4并不支持placeholder标签属性，作为替代，我们创建并返回一个<div>元素，
+        // 当中包含文本域和一个相关联的包含placeholder文本的<label>
+        class HTML4TextField {
+            constructor(displayText = '') {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const wrapper = document.createElement('div');
+                const textField = document.createElement('input');
+                const textFieldId = `text-field-${Math.floor(Math.random()*999)}`;
+                const label = document.createElement('label');
+                const labelText = document.createTextNode(this.displayText);
+
+                textField.setAttribute('type', 'text');
+                textField.setAttribute('id', textFieldId);
+
+                // 使用label的for标签与input的id关联起来
+                label.setAttribute('for', textFieldId);
+                label.appendChild(labelText);
+
+                wrapper.appendChild(textField);
+                wrapper.appendChild(label);
+
+                return wrapper;
+            }
+        }
+    
+        class Html5EmailField {
+            constructor(displayText = '') {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const emailField = document.createElement('input');
+
+                emailField.setAttribute('type', 'email');
+                emailField.setAttribute('placeholder', this.displayText);
+
+                return emailField;
+            }
+        }
+
+        // 定义按钮表单元素，此元素在HTML5和HTML4是一致的，并不需要单独两个类
+        // 如果需要单独创建一个不同的HTML5版本的按钮，只需根据变化更新相关的工厂类
+        // 而整个应用程序中其他代码会相应地作出调整
+        class ButtonField {
+            constructor(displayText = '') {
+                this.displayText = displayText;
+            }
+
+            getElement() {
+                const button = document.createElement('button');
+
+                button.setAttribute('type', 'submit');
+                button.innerHTML = this.displayText;
+
+                return button;
+            }
+        }
+
+        window.FormFieldFactory = FormFieldFactory;
+        window.html5FormFieldFactory = html5FormFieldFactory;
+        window.html4FormFieldFactory = html4FormFieldFactory;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用抽象工厂模式
+        // 确认浏览器是否支持HTML5，并选择合适的表单域工厂
+        const supportsHtml5FormFields = (function() {
+            const field = document.createElement('input');
+
+            field.setAttribute('type', 'email');
+
+            return 'email' === field.type;
+        })();
+
+        const formFieldFactory = supportsHtml5FormFields ? new html5FormFieldFactory(): new html4FormFieldFactory();
+
+        const textField = formFieldFactory.makeField({
+            type: 'text',
+            displayText: 'Enter the first line of your address.'
+        });
+        const emailField = formFieldFactory.makeField({
+            type: 'email',
+            displayText: 'Enter your email address'
+        });
+        const buttonField = formFieldFactory.makeField({
+            type: formFieldFactory.availableTypes.BUTTON,  // 使用含有工厂“类”所支持的属性，推荐使用这种方法
+            displayText: 'Submit'
+        });
+
+        window.addEventListener('load', function() {
+            const body = document.body;
+
+            body.appendChild(textField.getElement());
+            body.appendChild(emailField.getElement());
+            body.appendChild(buttonField.getElement());
+        }, false);
+    </script>
+</body>
+</html>
