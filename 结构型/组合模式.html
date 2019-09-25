@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>组合模式</title>
+    <script>
+    (function() {
+        // 组合模式
+        const elements = {
+            get(tag) {
+                const elems = [...document.getElementsByTagName(tag)];
+
+                return 1===elems.length ? elems[0] : elems;  // 返回可能是单个元素或数组
+            },
+            // 组合模式下，elems可以为单个元素，也可以为数组
+            addClass(elems, newClassName) {
+                if('[object Array]' === Object.prototype.toString.call(elems)) {
+                    elems.map(elem => {
+                        elem.className = [elem.className, newClassName].join(' ').trim();
+                    });
+                } else {
+                    elems.className = [elems.className, newClassName].join(' ').trim();
+                }
+            }
+        };
+
+        window.elements = elements;
+    })();
+    </script>
+</head>
+<body>
+    <a href="适配器模式.html" class="link">适配器模式</a>
+    <a href="组合模式.html" class="link red">组合模式</a>
+    <a href="装饰模式.html">组合模式</a>
+
+    <script>
+        // 使用组合模式
+        const body = elements.get('body');
+        const links = elements.get('a');
+
+        elements.addClass(body, 'has-js');
+        elements.addClass(links, 'custom-link')
+    </script>
+</body>
+</html>
