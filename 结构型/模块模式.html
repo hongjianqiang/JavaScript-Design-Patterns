@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>模块模式</title>
+    <script>
+    (function() {
+        // 模块模式
+        const cookie = (function(doc, undefined) {
+            const allCookies = doc.cookie.split(';');
+
+            const cookies = allCookies.reduce((result, cookie) => {
+                const [key, value] = cookie.split('=');
+                result[unescape(key)] = unescape(value);
+                return result;
+            }, {});
+
+            return {
+                get cookies() {
+                    return cookies;
+                },
+                get(name) {
+                    return cookies[name] || '';
+                },
+                set(name, value) {
+                    cookies[name] = value;
+                    document.cookie = `${escape(name)} = ${escape(value)}`;
+                }
+            }
+        })(document);
+
+        window.cookie = cookie;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用模块模式
+        console.log(cookie.cookies);
+    </script>
+</body>
+</html>
