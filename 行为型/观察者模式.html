@@ -46,7 +46,7 @@
         <input type="text" name="age">
         <input type="text" name="job">
         <input type="text" name="id">
-        <input type="submit" value="提交">
+        <button type="submit">提交</button>
     </form>
 
     <script>
@@ -54,6 +54,10 @@
         (function(observer) {
             // 定义一个模块，用于Ajax通信
             function ajaxPost(url, data, callback) {
+                setTimeout(()=>{
+                    callback(`模拟响应成功 ${data}`);
+                }, 1*1000);
+                /**
                 const xhr = new XMLHttpRequest();
                 const STATE_LOADED = 4;
                 const STATE_OK = 200;
@@ -62,12 +66,10 @@
                     if( xhr.readyState !== STATE_LOADED ) return;
                     if( xhr.status === STATE_OK ) callback(xhr.responseText);
                 };
-
                 xhr.open('POST', url);
-
                 xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
                 xhr.send(data);
+                **/
             }
 
             observer.subscribe('form-submit', (url, formData) => {
