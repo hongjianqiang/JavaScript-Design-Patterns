@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>中介者模式</title>
+    <script>
+    (function() {
+        // 中介者模式
+        // 中介者模式是观察者模式的一种变体，区别在于：中介者模式创建的是一个“类”
+        class Mediator {
+            constructor() {
+                this.events = {};
+            }
+            subscribe(eventName, callback) {
+                if( !this.events.hasOwnProperty(eventName) ) {
+                    this.events[eventName] = [];
+                }
+                this.events[eventName].push(callback);
+            }
+            unsubscribe(eventName, callback) {
+                let index = 0, length = 0;
+                if( this.events.hasOwnProperty(eventName) ) {
+                    length = this.events[eventName].length;
+
+                    for(; index<length; index++) {
+                        if( this.events[eventName][index] === callback ) {
+                            this.events[eventName].splice(index, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+            public(eventName, ...data) {
+                if( this.events.hasOwnProperty(eventName) ) {
+                    this.events[eventName].map(event => event.apply(this, data) );
+                }
+            }
+        }
+
+        window.Mediator = Mediator;
+    })();
+    </script>
+</head>
+<body>
+    <form id="my-form">
+        <input type="text" name="age">
+        <input type="text" name="job">
+        <input type="text" name="id">
+        <input type="submit" value="提交">
+    </form>
+
+    <script>
+        // 使用中介者模式
+        const formsMediator = new Mediator();
+        const loggingMediator = new Mediator();
+
+        // 定义一个模块，用于Ajax通信
+        (function(formsMediator) {
+            function ajaxPost(url, data, callback) {
+                setTimeout(()=>{
+                    callback(`模拟响应成功 ${data}`);
+                }, parseInt(Math.random()*1000));
+            }
+
+            formsMediator.subscribe('form-submit', function(url, formData) {
+                ajaxPost(url, formData, (response) => {
+                    formsMediator.public('ajax-response', response);
+                });
+            });
+        })(formsMediator);
+
+        (function(formsMediator) {
+            const form = document.getElementById('my-form');
+            const action = form.action;
+            const data = [];
+            const fields = form.getElementsByTagName('input');
+
+            let index = 0;
+            let length = fields.length;
+            let field;
+
+            function onFormSubmit(e) {
+                e.preventDefault();
+
+                for(; index < length; index++) {
+                    field = fields[index];
+                    data.push( escape(field.name) + '=' + escape(field.value) );
+                }
+
+                formsMediator.public('form-submit', action, data.join('&'));
+            }
+
+            form.addEventListener('submit', onFormSubmit, false);
+
+            formsMediator.subscribe('ajax-response', function(response) {
+                const thankYouMessage = document.createElement('p');
+
+                thankYouMessage.innerHTML = `Thank you for your from submission.<br>The server responded with: ${response}`
+                form.parentNode.appendChild(thankYouMessage);
+            });
+        })(formsMediator);
+
+        (function(loggingMediator) {
+            const logs = [];
+
+            loggingMediator.subscribe('log', function(message) {
+                logs.push({
+                    message: message,
+                    date: new Date()
+                });
+            });
+
+            loggingMediator.subscribe('retrieve-log', function() {
+                loggingMediator.public('log-retrieved', logs);
+            });
+        })(loggingMediator);
+
+        (function(loggingMediator) {
+            const button = document.createElement('button');
+
+            button.innerHTML = 'Show logs';
+
+            button.addEventListener('click', () => {
+                loggingMediator.public('retrieve-log');
+            }, false);
+
+            loggingMediator.subscribe('log-retrieved', (logs) => {
+                let index = 0;
+                let length = logs.length;
+                let ulTag = document.createElement('ul');
+                let liTag = document.createElement('li');
+                let listItem;
+
+                for(; index < length; index++) {
+                    listItem = liTag.cloneNode(false);
+                    listItem.innerHTML = logs[index].date.toUTCString() + ': ' + logs[index].message;
+                    ulTag.appendChild(listItem);
+                }
+
+                document.body.appendChild(ulTag);
+            });
+
+            document.body.appendChild(button);
+        })(loggingMediator);
+
+        (function(formsMediator, loggingMediator) {
+            formsMediator.subscribe('form-submit', (url) => {
+                loggingMediator.public('log', 'Form submitted to '+url);
+            });
+            formsMediator.subscribe('ajax-response', (response) => {
+                loggingMediator.public('log', `The server responded to an Ajax call with: ${response}`)
+            })
+        })(formsMediator, loggingMediator);
+    </script>
+</body>
+</html>
