@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>职责链模式</title>
+    <script>
+    (function() {
+        // 职责链模式
+        // 定义一个对象，列出系统中日志记录的不同级别
+        const LogLevel = {
+            INFO: 'INFO',
+            WARN: 'WARN',
+            ERROR: 'ERRO'
+        };
+
+        class LogFormatter {
+            constructor(logLevel) {
+                this.logLevel = logLevel;
+                this.nextInChain = null;
+            }
+            setNextInChain(next) {
+                this.nextInChain = next;
+            }
+            createLogMessage(message, logLevel) {
+                let returnValue;
+
+                if( logLevel === this.logLevel ) {
+                    if( logLevel === LogLevel.ERROR ) {
+                        returnValue = `${logLevel} : ${message.toUpperCase()}`;
+                    } else if( logLevel === LogLevel.WARN ) {
+                        returnValue = `${logLevel} : ${message}`
+                    } else {
+                        returnValue = message;
+                    }
+                } else if( this.nextInChain ) {
+                    returnValue = this.nextInChain.createLogMessage(message, logLevel);
+                }
+
+                return returnValue;
+            }
+        }
+
+        // 定义一个单例，用于保存和输出系统单日志消息记录
+        const log = (function () {
+            const logs = [];
+            const infoLogger = new LogFormatter(LogLevel.INFO);
+            const warnLogger = new LogFormatter(LogLevel.WARN);
+            const errorLogger= new LogFormatter(LogLevel.ERROR);
+            
+            let logger = errorLogger;
+
+            errorLogger.setNextInChain(warnLogger);
+            warnLogger.setNextInChain(infoLogger);
+
+            return {
+                getLogs() {
+                    return logs.join('\n');
+                },
+                message(message, logLevel) {
+                    const logMessage = logger.createLogMessage(message, logLevel);
+                    logs.push(logMessage);
+                }
+            }
+        })();
+
+        window.log = log;
+        window.LogLevel = LogLevel;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用职责链模式
+        log.message('Something vary bad happened', LogLevel.ERROR);
+        log.message('Something bad happened', LogLevel.WARN);
+        log.message('Something happened', LogLevel.INFO);
+
+        alert(log.getLogs());
+    </script>
+</body>
+</html>
