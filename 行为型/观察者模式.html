@@ -56,7 +56,7 @@
             function ajaxPost(url, data, callback) {
                 setTimeout(()=>{
                     callback(`模拟响应成功 ${data}`);
-                }, 1*1000);
+                }, parseInt(Math.random()*1000));
                 /**
                 const xhr = new XMLHttpRequest();
                 const STATE_LOADED = 4;
@@ -90,8 +90,6 @@
             let length = fields.length;
             let field;
 
-            const thankYouMessage = document.createElement('p');
-
             function onFormSubmit(e) {
                 e.preventDefault();
 
@@ -106,6 +104,8 @@
             form.addEventListener('submit', onFormSubmit, false);
 
             observer.subscribe('ajax-response', function(response) {
+                const thankYouMessage = document.createElement('p');
+
                 thankYouMessage.innerHTML = `Thank you for your from submission.<br>The server responded with: ${response}`
                 form.parentNode.appendChild(thankYouMessage);
             });
