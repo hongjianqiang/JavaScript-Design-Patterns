@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>观察者模式</title>
+    <script>
+    (function() {
+        // 观察者模式
+        const observer = (function() {
+            const events = {};
+            
+            return {
+                subscribe(eventName, callback) {
+                    if( !events.hasOwnProperty(eventName) ) events[eventName] = [];
+                    events[eventName].push(callback);
+                },
+                unsubscribe(eventName, callback) {
+                    let index = 0, length = 0;
+
+                    if( events.hasOwnProperty(eventName) ) {
+                        length = events[eventName].length;
+                        for(; index<length; index++) {
+                            if(events[eventName][index] === callback) {
+                                events[eventName].splice(index, 1);
+                                break;
+                            }
+                        }
+                    }
+                },
+                public(eventName, ...data) {
+                    if(events.hasOwnProperty(eventName)) {
+                        events[eventName].map(event => event.apply(this, data));
+                    }
+                }
+            };
+        })();
+        
+        window.observer = observer;
+    })();
+    </script>
+</head>
+<body>
+    <form id="my-form">
+        <input type="text" name="age">
+        <input type="text" name="job">
+        <input type="text" name="id">
+        <input type="submit" value="提交">
+    </form>
+
+    <script>
+        // 使用观察者模式
+        (function(observer) {
+            // 定义一个模块，用于Ajax通信
+            function ajaxPost(url, data, callback) {
+                const xhr = new XMLHttpRequest();
+                const STATE_LOADED = 4;
+                const STATE_OK = 200;
+
+                xhr.onreadystatechange = function() {
+                    if( xhr.readyState !== STATE_LOADED ) return;
+                    if( xhr.status === STATE_OK ) callback(xhr.responseText);
+                };
+
+                xhr.open('POST', url);
+
+                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                xhr.send(data);
+            }
+
+            observer.subscribe('form-submit', (url, formData) => {
+                ajaxPost(url, formData, (response) => {
+                    observer.public('ajax-response', response);
+                });
+            });
+        })(observer);
+
+        // 定义一个模块，用于处理页面中的一个简单表单提交事宜
+        (function(observer) {
+            const form = document.getElementById('my-form');
+            const action = form.action;
+            const data = [];
+            const fields = form.getElementsByTagName('input');
+
+            let index = 0;
+            let length = fields.length;
+            let field;
+
+            const thankYouMessage = document.createElement('p');
+
+            function onFormSubmit(e) {
+                e.preventDefault();
+
+                for(; index < length; index++) {
+                    field = fields[index];
+                    data.push( escape(field.name) + '=' + escape(field.value) );
+                }
+
+                observer.public('form-submit', action, data.join('&'));
+            }
+
+            form.addEventListener('submit', onFormSubmit, false);
+
+            observer.subscribe('ajax-response', function(response) {
+                thankYouMessage.innerHTML = `Thank you for your from submission.<br>The server responded with: ${response}`
+                form.parentNode.appendChild(thankYouMessage);
+            });
+        })(observer);
+    </script>
+</body>
+</html>
