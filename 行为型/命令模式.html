@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>职责链模式</title>
+    <script>
+    (function() {
+        // 命令模式
+        const cookie = (function() {
+            const allCookies = document.cookie.split(';');
+            const cookies = allCookies.reduce((result, cookie) => {
+                const [key, value] = cookie.split('=');
+                result[unescape(key).trim()] = unescape(value).trim();
+                return result;
+            }, {});
+
+            return {
+                get(name) {
+                    return cookies[name.trim()] || '';
+                },
+                set(name, value) {
+                    cookies[name] = value;
+                    document.cookie = escape(name).trim() + '=' + escape(value).trim();
+                },
+                remove(name) {
+                    delete cookies[name];
+                    document.cookie = escape(name).trim() + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+                },
+                // 提供一个execute()方法，用于对其他方法的调用进行抽象
+                execute(command, params) {
+                    if( this.hasOwnProperty(command) && 'function'===typeof(this[command]) ) {
+                        return this[command].apply(this, params);
+                    }
+                }
+            };
+        })();
+
+        window.cookie = cookie;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用命令模式
+        // 使用execute()方法来非直接调用cookie单例的set()方法
+        cookie.execute('set', ['name', '朱一旦']);
+        alert( cookie.execute('get', ['name']) );
+    </script>
+</body>
+</html>
