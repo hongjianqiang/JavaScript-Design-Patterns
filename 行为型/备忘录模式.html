@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>备忘录模式</title>
+    <script>
+    (function() {
+        // 备忘录模式
+        class Memento {
+            constructor(storage = {}) {
+                this.storage = storage;
+            }
+            saveState(key, obj) {
+                this.storage[key] = JSON.stringify(obj);
+            }
+            restoreState(key) {
+                let output = {};
+                if( this.storage.hasOwnProperty(key) ) {
+                    output = this.storage[key];
+                    output = JSON.parse(output);
+                }
+                return output;
+            }
+        }
+
+        window.Memento = Memento;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用备忘录模式
+        const memento = new Memento();
+        let user = {
+            name: 'Den Odell',
+            age: 35
+        };
+
+        memento.saveState('user', user);
+        alert(memento.storage['user']);
+
+        user.name = 'John Smith';
+        user.age = 21;
+
+        alert(JSON.stringify(user));
+
+        user = memento.restoreState('user');
+
+        alert(JSON.stringify(user));
+    </script>
+</body>
+</html>
