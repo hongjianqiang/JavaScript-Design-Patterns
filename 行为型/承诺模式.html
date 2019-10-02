@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>承诺模式</title>
+    <script>
+    (function() {
+        // 承诺模式
+        const Promise = (function() {
+            const PENDING   = 'Pending';    // 等待态
+            const FULFILLED = 'Fulfilled';  // 执行态
+            const REJECTED  = 'Rejected';   // 拒绝态
+
+            const defer = setTimeout;
+            
+            function resolvePromise(promise, x, resolve, reject) {
+                if( promise === x ) {
+                    reject(new TypeError('循环引用'));
+                } else if( x instanceof _Promise ) {
+                    if( PENDING === x.state ) {
+                        x.then(
+                            y => resolvePromise(promise, y, resolve, reject),
+                            reason => reject(reason)
+                        );
+                    } else {
+                        x.then(resolve, reject);
+                    }
+                } else if( x && ('function' === typeof(x) || typeof(x) === 'object') ) {
+                    let called = false;
+                    try {
+                        const then = x.then;
+                        if( 'function' === typeof(then) ) {
+                            then.call(
+                                x, 
+                                y => {
+                                    if(called) return;
+                                    called = true;
+                                    resolvePromise(promise, y, resolve, reject);
+                                },
+                                r => {
+                                    if(called) return;
+                                    called = true;
+                                    reject(r)
+                                }
+                            );
+                        } else {
+                            resolve(x);
+                        }
+                    } catch(e) {
+                        if(called) return;
+                        called = true;
+                        reject(e);
+                    }
+                } else {
+                    resolve(x);
+                }
+            }
+
+            class _Promise {
+                constructor(initFunc) {
+                    // debugger;
+                    this.state  = PENDING;
+                    this.value  = null;
+                    this.reason = null;
+                    this.onFulfilledCallbacks = [];
+                    this.onRejectedCallbacks  = [];
+
+                    const resolve = (value) => {
+                        if(PENDING === this.state) {
+                            defer(() => {
+                                this.state = FULFILLED;
+                                this.value = value;
+                                this.onFulfilledCallbacks.map(cb => {
+                                    cb = cb(this.value);
+                                });
+                            });
+                        }
+                    };
+
+                    const reject = (reason) => {
+                        if(PENDING === this.state) {
+                            defer(() => {
+                                this.state = REJECTED;
+                                this.reason = reason;
+                                this.onRejectedCallbacks.map(cb => {
+                                    cb = cb(this.reason);
+                                });
+                            });
+                        }
+                    };
+
+                    try {
+                        initFunc(resolve, reject);
+                    }catch(e) {
+                        this.reject(e);
+                    }
+                }
+
+                then(onFulfilled, onRejected) {
+                    /**
+                     * 2.2.1 Both onFulfilled and onRejected are optional arguments:
+                     *     2.2.1.1 If onFulfilled is not a function, it must be ignored.
+                     *     2.2.1.2 If onRejected is not a function, it must be ignored.
+                     * 
+                     * 如果用户传进来的 onFulFilled 和 onRejected 不是函数的话，我们就忽略掉，定义为内部的函数
+                     * 
+                     * 简单来说就是把值往后抛，让下个then可以获取得到这个then的数据。
+                     * 
+                     * new Promise(resolve => resolve(4)).then().then(val => console.log(val));
+                     */
+                    if( 'function' !== typeof(onFulfilled) ) {
+                        onFulfilled = value => value;
+                    }
+                    if( 'function' !== typeof(onRejected) ) {
+                        onRejected = reason => {
+                            throw reason;
+                        };
+                    }
+
+                    if( PENDING === this.state ) {
+                        const newPromise = new _Promise((resolve, reject) => {
+                            this.onFulfilledCallbacks.push((value) => {
+                                try {
+                                    const x = onFulfilled(value);
+                                    resolvePromise(newPromise, x, resolve, reject);
+                                } catch(e) {
+                                    reject(e);
+                                }
+                            });
+
+                            this.onRejectedCallbacks.push((reason) => {
+                                try {
+                                    const x = onRejected(reason);
+                                    resolvePromise(newPromise, x, resolve, reject);
+                                } catch(e) {
+                                    reject(e);
+                                }
+                            });
+                        });
+
+                        return newPromise;
+                    }
+
+                    if( FULFILLED === this.state ) {
+                        const newPromise = new _Promise(()=>{
+                            defer(() => {  // 2.2.4 onFulfilled 只有在执行环境堆栈仅包含平台代码时才可被调用
+                                onFulfilled(this.value);
+                            });
+                        });
+
+                        return newPromise;
+                    }
+
+                    if( REJECTED === this.state ) {
+                        const newPromise = new _Promise(() => {
+                            defer(() => {  // 2.2.4 onRejected 只有在执行环境堆栈仅包含平台代码时才可被调用
+                                onRejected(this.reason);
+                            });
+                        });
+
+                        return newPromise;
+                    }
+                }
+            }
+
+            return _Promise;
+        })();
+
+        window.Promise = Promise;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用承诺模式
+        let millisecondCount = 0;
+
+        function ajaxGet(url) {
+            return new Promise((fulfill, reject) => {
+                const t = parseInt(Math.random()*1000);
+
+                setTimeout(() => {
+                    if( t % 2 ) {
+                        fulfill('Ajax 请求成功');
+                    } else {
+                        reject('Ajax 请求失败');
+                    }
+                }, t);
+            });
+        }
+
+        function wait(milliseconds) {
+            return new Promise((fulfill, reject) => {
+                if( milliseconds && typeof(milliseconds) === 'number' &&milliseconds > 0 ) {
+                    setTimeout(function() {
+                        fulfill(milliseconds);
+                    }, milliseconds)
+                } else {
+                    reject(`Not an acceptable value provided for milliseconds: ${milliseconds}`);
+                }
+            });
+        }
+
+        const onSuccess = (milliseconds) => {
+            alert(`${milliseconds}ms passed`);
+        };
+
+        const onError = (error) => {
+            alert(error);
+        }
+
+        // 例子1: 成功
+        wait(500).then(onSuccess, onError);
+
+        // 例子2: 失败
+        wait(0).then(onSuccess, onError);
+
+        // 例子3: 链式连接
+        wait(1000)
+            .then(function(milliseconds) {
+                millisecondCount += milliseconds;
+                return wait(1600);
+            })
+            .then(function(milliseconds) {
+                millisecondCount += milliseconds;
+                return wait(400);
+            })
+            .then(function(milliseconds) {
+                millisecondCount += milliseconds;
+                alert(`${millisecondCount}ms passed.`)
+            });
+
+        // 例子4: 多个 promise
+        ajaxGet('/page1.html')
+            .then(() => await(3000))
+            .then(() => ajaxGet('/page2.html'))
+            .then(() => alert('/page1.html and /page2.html received, with a 3s gap between requests.'));
+    </script>
+</body>
+</html>
