@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>策略模式</title>
+    <script>
+    (function() {
+        // 策略模式
+        class FormField {
+            constructor(type = 'text', displayText = '', strategy) {
+                this.type = type;
+                this.displayText = displayText;
+
+                this.element = document.createElement('input');
+                this.element.setAttribute('type', this.type);
+
+                this.label = document.createElement('label');
+                this.label.innerHTML = this.displayText;
+
+                // 坚持是否有包含isValid()方法的策略对象传入
+                if( strategy && typeof(strategy.isValid) === 'function' ) {
+                    this.strategy = strategy;
+                } else {
+                    this.strategy = {
+                        isValid: function() {
+                            return false;
+                        }
+                    }
+                }
+
+                document.body.appendChild(this.label);
+                document.body.appendChild(this.element);
+            }
+
+            getValue() {
+                return this.element.value;
+            }
+
+            setValue(value) {
+                this.element.value = value;
+            }
+
+            isValid() {
+                return this.strategy.isValid.call(this);
+            }
+        }
+
+        window.FormField = FormField;
+    })();
+    </script>
+</head>
+<body>
+    <script>
+        // 使用策略模式
+        // 定义3个策略对象
+        const textFieldStrategy = {
+            isValid() {
+                return this.getValue() !== '';
+            }
+        };
+
+        const emailFieldStrategy = {
+            isValid() {
+                const value = this.getValue();
+                return (value !== '') && value.indexOf('@')>0 && value.indexOf('.', value.indexOf('@')) > 0;
+            }
+        };
+
+        const numberFieldStrategy = {
+            isValid() {
+                const value = this.getValue();
+                return !isNaN(parseInt(value, 10));
+            }
+        };
+
+        const textField = new FormField('text', 'First Name', textFieldStrategy);
+        const emailField = new FormField('email', 'Email', emailFieldStrategy);
+        const numberField = new FormField('number', 'Age', numberFieldStrategy);
+
+        textField.setValue('洪建强'); alert(textField.isValid());
+        emailField.setValue('HongJianQiang@gmail.com'); alert(emailField.isValid());
+        numberField.setValue(28);  alert(numberField.isValid());
+
+        textField.setValue('');  alert(textField.isValid());
+        emailField.setValue('洪建强'); alert(emailField.isValid());
+        numberField.setValue('FoShan'); alert(numberField.isValid());
+
+    </script>
+</body>
+</html>
