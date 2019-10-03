@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>MVVM模式</title>
+</head>
+<body>
+    <form data-submit="addEmail">
+        <input type="text" placeholder="New email address">
+        <button type="submit">Add</button>
+    </form>
+
+    <ul data-loop>
+        <li>
+            <span data-text></span>
+            <button data-click="removeEmail">Remove</button>
+        </li>
+    </ul>
+
+    <script src="../MVC模式/observer.js"></script>
+    <script src="../MVC模式/model.js"></script>
+    <script src="viewModel.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
