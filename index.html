@@ -5,8 +5,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>JavaScript 设计模式归类</title>
+    <style>
+        h1, h2, h3, h4 { margin: .1rem 0; }
+        
+        h1 { font-size: 2rem; }
+
+        h2 {
+            font-size: 1.5rem;
+            padding-left: 20px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            padding-left: 40px;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-style: italic;
+            padding-left: 60px;
+            font-weight: normal;
+        }
+    </style>
 </head>
 <body>
-    
+    <h1>JavaScript 设计模式归类</h1>
+    <br>
+
+    <h2>创建型</h2>
+    <div>
+        <h3><a href="创建型/工厂模式.html" target="_bank">工厂模式</a></h3>
+        <h4>对象的创建过程被予以抽象，使得相对复杂的对象创建过程得以封装于简单的接口之下，而不需要使用new关键字。</h4>
+    </div>
+    <div>
+        <h3><a href="创建型/抽象工厂模式.html" target="_bank">抽象工厂模式</a></h3>
+        <h4>从现有代码中的多个“类”中，根据这些“类”之间共有的目的或通用的主题，创建出一个额外的抽象层，以降低应用程序的其余开发工作的复杂性。</h4>
+    </div>
+    <div>
+        <h3><a href="创建型/生成器模式.html" target="_bank">生成器模式</a></h3>
+        <h4>我们只需要提供我们所希望创建的对象内容和类型即可，而决定使用哪个“类”进行对象创建的工作则由生成器完成。</h4>
+    </div>
+    <div>
+        <h3><a href="创建型/原型模式.html" target="_bank">原型模式</a></h3>
+        <h4>通过使用原型继承克隆已存在的对象来创建出新的对象。</h4>
+    </div>
+    <div>
+        <h3><a href="创建型/单例模式.html" target="_bank">单例模式</a></h3>
+        <h4>只有一个单独实例的对象。</h4>
+    </div>
+    <br>
+
+    <h2>结构型</h2>
+    <div>
+        <h3><a href="结构型/适配器模式.html" target="_bank">适配器模式</a></h3>
+        <h4>当需要把不同的代码进行关联，否则这些代码无法兼容在一起工作，使用适配器模式最合适</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/组合模式.html" target="_bank">组合模式</a></h3>
+        <h4>为一个或多个对象创建一个接口，使开发者不需要操心需要传入多少个对象作为方法参数。</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/装饰模式.html" target="_bank">装饰模式</a></h3>
+        <h4>为某个“类”所创建的对象，扩展额外的方法和属性，避免因创建大量的子类而变得难以维护。</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/外观模式.html" target="_bank">外观模式</a></h3>
+        <h4>通过编写一个单独的函数，来简化对一个或多个更大型更复杂的函数的访问调用。</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/享元模式.html" target="_bank">享元模式</a></h3>
+        <h4>当面对大量的对象时，把这些对象共有的属性“key: value”分离成更小的对象，通过对这些小对象的引用来实现数据共享，从而使代码内存占用更小，运行更高效。</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/掺合模式.html" target="_bank">掺合(Mixin)模式</a></h3>
+        <h4>快速直接地把一个对象的属性和方法应用到另一个对象，譬如 Object.assing(ob1, obj2, obj3) 。</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/模块模式.html" target="_bank">模块模式</a></h3>
+        <h4>基于自执行函数闭包，我们可以创建一个代码的安全沙箱区域，从而把我们的代码库划分为若干更小、更紧密的代码块。</h4>
+    </div>
+    <div>
+        <h3><a href="结构型/代理模式.html" target="_bank">代理模式</a></h3>
+        <h4>定义一个代理对象或方法来替换或增强一个已存在的对象或方法。</h4>
+    </div>
+    <br>
+
+    <h2>行为型</h2>
+    <div>
+        <h3><a href="行为型/职责链模式.html" target="_bank">职责链模式</a></h3>
+        <h4>当需要访问一些有层级关系的对象，但又不想向代码的其余部分暴露此层级结构时，使用职责链模式最合适。</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/命令模式.html" target="_bank">命令模式</a></h3>
+        <h4>所有的调用都经过某个对象上的一个单独、公共的方法（通常命名为run()或execute()方法）</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/迭代器模式.html" target="_bank">迭代器模式</a></h3>
+        <h4>可以使应用程序的代码对某个数据集合进行迭代或循环访问，而又不必清楚数据在内部是如何保存或构建的。</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/观察者模式.html" target="_bank">观察者模式</a></h3>
+        <h4>也称“订阅-发布模式”，在整个代码库中进行全局的事件监听与发布。</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/中介者模式.html" target="_bank">中介者模式</a></h3>
+        <h4>观察者(订阅-发布)模式的变体，区别在于中介者模式定义了一些局部的对象用于实现某些特定的事件监听与发布，从而使代码库更容易管理和维护。</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/备忘录模式.html" target="_bank">备忘录模式</a></h3>
+        <h4>以静态形式在内存中定义对象数据的存储，这样，在代码执行的后期可以对对象数据进行恢复。</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/承诺模式.html" target="_bank">承诺模式</a></h3>
+        <h4>在处理大量的异步函数时，会向异步函数传入大量回调函数，从而使得代码难以阅读，此时使用承诺模式的链式顺序结构可以改善代码的清晰度。</h4>
+    </div>
+    <div>
+        <h3><a href="行为型/策略模式.html" target="_bank">策略模式</a></h3>
+        <h4>某个“类”包含大量的条件性语句，与其维护大量的条件性语句，不如将其划分为多个独立对象，每个对象称为策略。</h4>
+    </div>
+    <br>
+
+    <h2>架构型</h2>
+    <div>
+        <h3><a href="架构型/MVC模式/index.html" target="_bank">MVC模式</a></h3>
+        <h4>视图(View) => 控制器(Controller) => 模型(Model) 最后到 视图(View) ，数据流都是单向传递的。</h4>
+    </div>
+    <div>
+        <h3><a href="架构型/MVP模式/index.html" target="_bank">MVP模式</a></h3>
+        <h4>视图(View) <==> 表示器(Presenter) <==> 模型(Model) ，也就是说 View 和 Model 的通讯必须经过 Presenter 。</h4>
+    </div>
+    <div>
+        <h3><a href="架构型/MVVM模式/index.html" target="_bank">MVVM模式</a></h3>
+        <h4>视图(View) <--> 视图模型(ViewModel) <==> 模型(Model) ，View 和 ViewModel 是双向绑定的，ViewModel 和 Model 可以互相通知变更。</h4>
+    </div>
+    <br>
 </body>
 </html>
